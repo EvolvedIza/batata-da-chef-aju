@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Painel Administrativo — Batata da Chef Aju</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+  <!-- ===== TELA DE LOGIN ===== -->
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">🥔</div>
+      <h1>Batata da Chef Aju</h1>
+      <p class="login-sub">Painel Administrativo</p>
+
+      <form id="loginForm" class="login-form">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" required autocomplete="username" placeholder="seu@email.com" />
+
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" required autocomplete="current-password" placeholder="••••••••" />
+
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Entrar</button>
+        <p class="login-erro" id="loginErro" role="alert" hidden></p>
+      </form>
+      <p class="login-hint">Acesso restrito ao proprietário.</p>
+    </div>
+  </section>
+
+  <!-- ===== PAINEL ===== -->
+  <div class="admin-app" id="adminApp" hidden>
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <span class="admin-brand-emoji">🥔</span>
+        <span>Chef Aju</span>
+      </div>
+      <nav class="admin-nav">
+        <button class="admin-nav-btn active" data-tab="produtos">📦 Produtos</button>
+        <button class="admin-nav-btn" data-tab="config">⚙️ Configurações</button>
+      </nav>
+      <div class="admin-user">
+        <span id="adminEmail" class="admin-email"></span>
+        <button class="btn btn-outline btn-sm" id="logoutBtn">Sair</button>
+      </div>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="admin-main">
+
+      <!-- ===== ABA PRODUTOS ===== -->
+      <section class="admin-tab" id="tab-produtos">
+        <header class="admin-header">
+          <h1>Produtos</h1>
+          <button class="btn btn-primary" id="btnNovoProduto">+ Novo produto</button>
+        </header>
+
+        <div class="admin-filtros">
+          <input type="search" id="buscaProdutos" placeholder="Buscar produto…" />
+          <select id="filtroCategoria" aria-label="Filtrar por categoria">
+            <option value="">Todas as categorias</option>
+          </select>
+        </div>
+
+        <div class="tabela-wrap">
+          <table class="tabela-produtos">
+            <thead>
+              <tr>
+                <th>Imagem</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyProdutos">
+              <tr><td colspan="6" class="tabela-vazia">Carregando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== ABA CONFIGURAÇÕES ===== -->
+      <section class="admin-tab" id="tab-config" hidden>
+        <header class="admin-header">
+          <h1>Configurações</h1>
+        </header>
+
+        <form id="formConfig" class="admin-form">
+          <h2>Contato</h2>
+          <label for="cfgWhatsapp">Número do WhatsApp (DDI+DDD+número)</label>
+          <input type="text" id="cfgWhatsapp" placeholder="79981515981" required />
+          <small>Exemplo: 5567999999999 (sem espaços, + ou parênteses)</small>
+
+          <label for="cfgIfood">URL do iFood</label>
+          <input type="url" id="cfgIfood" placeholder="https://www.ifood.com.br/..." />
+
+          <button type="submit" class="btn btn-primary">Salvar configurações</button>
+        </form>
+
+        <hr />
+
+        <h2>Categorias</h2>
+        <form id="formCategoria" class="admin-form-inline">
+          <input type="text" id="novaCategoria" placeholder="Nome da nova categoria" required />
+          <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+        <ul class="lista-categorias" id="listaCategorias"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== MODAL PRODUTO ===== -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Novo produto</h2>
+        <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
+      </div>
+
+      <form id="formProduto" class="admin-form">
+        <input type="hidden" id="produtoId" />
+
+        <label for="prodNome">Nome *</label>
+        <input type="text" id="prodNome" required />
+
+        <label for="prodDescricao">Descrição</label>
+        <textarea id="prodDescricao" rows="3"></textarea>
+
+        <label for="prodPreco">Preço (R$) *</label>
+        <input type="number" id="prodPreco" step="0.01" min="0" required />
+
+        <label for="prodCategoria">Categoria *</label>
+        <select id="prodCategoria" required></select>
+
+        <label for="prodImagem">Foto do produto</label>
+        <input type="file" id="prodImagem" accept="image/*" />
+        <small>Formatos: JPG, PNG, WEBP. Tamanho máximo: 5 MB.</small>
+        <div class="preview-imagem" id="previewImagem">
+          <img id="previewImg" alt="" hidden />
+        </div>
+
+        <label for="prodOrdem">Ordem de exibição</label>
+        <input type="number" id="prodOrdem" min="0" value="0" />
+
+        <label class="switch">
+          <input type="checkbox" id="prodDisponivel" checked />
+          <span>Disponível no cardápio</span>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btnCancelarProduto">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSalvarProduto">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardápio — Batata da Chef Aju</title>
+  <meta name="description" content="Cardápio completo do Batata da Chef Aju: batatas recheadas, macarrões, sobremesas, bebidas e combos com entrega grátis até 5 km." />
+  <meta name="theme-color" content="#E63946" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-pagina="cardapio">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="Batata da Chef Aju - Início">
+        <span class="logo-emoji" aria-hidden="true">🥔</span>
+        <span class="logo-text">Batata da <strong>Chef Aju</strong></span>
+      </a>
+      <nav class="nav" aria-label="Menu principal">
+        <a href="index.html" class="nav-link">Início</a>
+        <a href="cardapio.html" class="nav-link active">Cardápio</a>
+        <a href="index.html#contato" class="nav-link">Contato</a>
+      </nav>
+      <button class="btn btn-primary btn-sm cart-toggle" id="cartToggle" aria-label="Abrir carrinho">
+        🛒 <span id="cartCount">0</span>
+      </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- TÍTULO DO CARDÁPIO -->
+  <section class="page-hero">
+    <div class="container">
+      <span class="badge badge-free">🚚 Entrega grátis até 5 km</span>
+      <h1>Nosso Cardápio</h1>
+      <p>Escolha seus favoritos, adicione ao carrinho e finalize pelo WhatsApp</p>
+    </div>
+  </section>
+
+  <!-- FILTRO DE CATEGORIAS -->
+  <nav class="categorias-nav container" aria-label="Filtrar por categoria">
+    <button class="cat-btn active" data-categoria="todas">Todas</button>
+    <!-- Botões gerados dinamicamente por main.js -->
+    <div id="categoriasBtns" style="display:contents"></div>
+  </nav>
+
+  <!-- GRID DE PRODUTOS -->
+  <section class="container cardapio-section">
+    <div class="grid-produtos" id="gridCardapio" aria-live="polite">
+      <div class="loading">Carregando cardápio…</div>
+    </div>
+    <div class="vazio" id="cardapioVazio" hidden>
+      <p>Nenhum produto disponível nesta categoria no momento.</p>
+    </div>
+  </section>
+
+  <!-- CARRINHO LATERAL (DRAWER) -->
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" aria-label="Carrinho de compras">
+    <div class="cart-header">
+      <h2>Seu pedido</h2>
+      <button class="cart-close" id="cartClose" aria-label="Fechar carrinho">✕</button>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <p class="cart-empty">Seu carrinho está vazio.</p>
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+
+      <form id="formPedido" class="form-pedido">
+        <label for="clienteNome">Seu nome *</label>
+        <input type="text" id="clienteNome" required placeholder="Nome completo" autocomplete="name" />
+
+        <label for="clienteEndereco">Endereço de entrega *</label>
+        <textarea id="clienteEndereco" rows="2" required placeholder="Rua, número, bairro, referência" autocomplete="street-address"></textarea>
+
+        <label for="pedidoObs">Observações</label>
+        <textarea id="pedidoObs" rows="2" placeholder="Ex.: sem cebola, ponto da carne…"></textarea>
+
+        <button type="submit" class="btn btn-whatsapp btn-block btn-lg">
+          <span aria-hidden="true">💬</span> Finalizar pelo WhatsApp
+        </button>
+      </form>
+    </div>
+  </aside>
+  <div class="cart-backdrop" id="cartBackdrop" hidden></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <p>© <span id="anoAtual"></span> Batata da Chef Aju — Entrega grátis até 5 km.</p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('anoAtual').textContent = new Date().getFullYear();
+    document.getElementById('menuToggle').addEventListener('click', function () {
+      const nav = document.querySelector('.nav');
+      const aberto = nav.classList.toggle('nav-open');
+      this.setAttribute('aria-expanded', aberto);
+    });
+  </script>
+</body>
+</html>
