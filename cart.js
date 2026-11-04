@@ -197,11 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Busca número do WhatsApp configurado no Supabase
     let numero = '';
     try {
-      const { data, error } = await db
-        .from('configuracoes')
-        .select('valor')
-        .eq('chave', 'whatsapp')
-        .single();
+      const numero = '5579981515981'; // hardcoded
       if (!error && data) numero = String(data.valor).replace(/\D/g, '');
     } catch (err) {
       console.error('Erro ao buscar WhatsApp:', err);
