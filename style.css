@@ -459,3 +459,34 @@ section { padding: 4rem 0; }
   .hero-buttons .btn { width: 100%; }
   .float-whatsapp { bottom: 1rem; right: 1rem; width: 52px; height: 52px; font-size: 1.5rem; }
 }
+
+/* CONTROLES + / − / X DENTRO DOS CARDS */
+.card-qtd-controles {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #F3F4F6;
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+.card-qtd-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: none; background: #FFF; color: #E63946;
+  font-weight: 800; font-size: 1rem;
+  display: grid; place-items: center; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: background .2s, color .2s;
+}
+.card-qtd-btn:hover { background: #E63946; color: #FFF; }
+.card-qtd-num {
+  min-width: 18px; text-align: center;
+  font-weight: 700; font-size: .9rem; color: #1F1F1F;
+}
+.card-x-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: none; background: transparent; color: #9CA3AF;
+  font-size: .8rem; font-weight: 700;
+  display: grid; place-items: center; cursor: pointer;
+  margin-left: 2px; transition: background .2s, color .2s;
+}
+.card-x-btn:hover { background: #FEE2E2; color: #DC2626; }
