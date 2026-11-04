@@ -25,36 +25,21 @@ function detectarPagina() {
 // CONFIGURAÇÕES (WhatsApp, iFood)
 // ============================================================
 async function carregarConfiguracoes() {
-  try {
-    const { data, error } = await db.from('configuracoes').select('chave, valor');
-    if (error) throw error;
-    const cfg = {};
-    (data || []).forEach(r => { cfg[r.chave] = r.valor; });
+  const numero = '5579981515981'; // <-- seu WhatsApp
+  const ifood = 'https://www.ifood.com.br/delivery/aracaju-se/batata-da-chef-suica/0bd7668c-3a53-4fca-9673-981aef057715';
 
-    const numero = (cfg.whatsapp || '').replace(/\D/g, '');
-    const ifood = cfg.ifood_url || '';
+  const msgPadrao = encodeURIComponent('Olá! Gostaria de fazer um pedido no Batata da Chef Aju 🥔');
+  const waUrl = `https://wa.me/${numero}?text=${msgPadrao}`;
 
-    const msgPadrao = encodeURIComponent('Olá! Gostaria de fazer um pedido no Batata da Chef Aju 🥔');
-    const waUrl = numero
-      ? `https://wa.me/${numero}?text=${msgPadrao}`
-      : 'https://instagram.com/batatadachefaju';
+  ['btnWhatsAppHero','btnWhatsAppContato','btnWhatsAppFooter','btnWhatsAppFlutuante'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = waUrl;
+  });
 
-    ['btnWhatsAppHero', 'btnWhatsAppContato', 'btnWhatsAppFooter', 'btnWhatsAppFlutuante']
-      .forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.href = waUrl;
-      });
-
-    ['btnIfoodHero', 'btnIfoodContato', 'btnIfoodFooter'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        if (ifood) el.href = ifood;
-        else el.style.display = 'none';
-      }
-    });
-  } catch (err) {
-    console.error('Erro ao carregar configurações:', err);
-  }
+  ['btnIfoodHero','btnIfoodContato','btnIfoodFooter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = ifood;
+  });
 }
 
 // ============================================================
@@ -101,22 +86,20 @@ function renderCategoriasBotoes() {
 // PRODUTOS
 // ============================================================
 async function carregarProdutos() {
-  try {
-    const { data, error } = await db
-      .from('produtos')
-      .select('id, nome, descricao, preco, imagem_url, disponivel, ordem, categoria_id, categorias(nome)')
-      .order('ordem', { ascending: true })
-      .order('nome', { ascending: true });
-    if (error) throw error;
-    _produtosCache = data || [];
-  } catch (err) {
-    console.error('Erro ao carregar produtos:', err);
-    _produtosCache = [];
-  }
+  // Lê do catálogo fixo (js/produtos.js)
+  _produtosCache = [...window.CATALOGO_PRODUTOS]
+    .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+}
+
+async function carregarCategorias() {
+  // Lê do catálogo fixo
+  _categoriasCache = [...window.CATALOGO_CATEGORIAS]
+    .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+  renderCategoriasBotoes();
 }
 
 function nomeCategoria(produto) {
-  return produto?.categorias?.nome || '—';
+  return produto?.categoria || produto?.categorias?.nome || '—';
 }
 
 // ============================================================
@@ -125,6 +108,28 @@ function nomeCategoria(produto) {
 function criarCardProduto(p) {
   const indisponivel = !p.disponivel;
   const img = p.imagem_url || 'images/placeholder.jpg';
+
+  const noCarrinho = window.Cart?.itens?.find(i => String(i.id) === String(p.id));
+  const qtd = noCarrinho ? noCarrinho.qtd : 0;
+
+  const controles = qtd > 0
+    ? `
+      <div class="card-qtd-controles">
+        <button class="card-qtd-btn" data-add-produto="${p.id}" aria-label="Aumentar">+</button>
+        <span class="card-qtd-num">${qtd}</span>
+        <button class="card-qtd-btn" data-remove-produto="${p.id}" aria-label="Diminuir">−</button>
+        <button class="card-x-btn" data-x-produto="${p.id}" aria-label="Remover do carrinho">✕</button>
+      </div>
+    `
+    : `
+      <button
+        class="card-btn"
+        data-add-produto="${p.id}"
+        ${indisponivel ? 'disabled' : ''}
+        aria-label="Adicionar ${escapeHtml(p.nome)} ao carrinho">
+        ${indisponivel ? 'Esgotado' : 'Adicionar'}
+      </button>
+    `;
 
   return `
     <article class="card-produto">
@@ -138,13 +143,7 @@ function criarCardProduto(p) {
         <p class="card-desc">${escapeHtml(p.descricao || '')}</p>
         <div class="card-footer">
           <span class="card-preco">${formatarPreco(p.preco)}</span>
-          <button
-            class="card-btn"
-            data-add-produto="${p.id}"
-            ${indisponivel ? 'disabled' : ''}
-            aria-label="Adicionar ${escapeHtml(p.nome)} ao carrinho">
-            ${indisponivel ? 'Esgotado' : 'Adicionar'}
-          </button>
+          ${controles}
         </div>
       </div>
     </article>
@@ -199,13 +198,28 @@ function renderCardapio() {
 // BOTÕES "ADICIONAR AO CARRINHO"
 // ============================================================
 function ligarBotoesAdicionar() {
+  const rerender = () => {
+    const pagina = document.body.dataset.pagina || detectarPagina();
+    if (pagina === 'home') renderHome();
+    if (pagina === 'cardapio') renderCardapio();
+  };
+
   document.querySelectorAll('[data-add-produto]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.addProduto;
-      const produto = _produtosCache.find(p => String(p.id) === String(id));
-      if (produto && window.Cart) {
-        window.Cart.adicionar(produto);
-      }
+      const produto = _produtosCache.find(p => String(p.id) === String(btn.dataset.addProduto));
+      if (produto && window.Cart) { window.Cart.adicionar(produto); rerender(); }
+    });
+  });
+
+  document.querySelectorAll('[data-remove-produto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.Cart) { window.Cart.diminuir(btn.dataset.removeProduto); rerender(); }
+    });
+  });
+
+  document.querySelectorAll('[data-x-produto]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.Cart) { window.Cart.remover(btn.dataset.xProduto); rerender(); }
     });
   });
 }
